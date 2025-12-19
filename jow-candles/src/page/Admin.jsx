@@ -84,10 +84,6 @@ function Admin() {
                 const { publicURL } = supabase.storage.from('jow-candles-product').getPublicUrl(data.path);
                 imageUrl = publicURL;
             }
-            else {
-                alert('Pick a photo first')
-                return
-            }
 
             const productData = {
                 ...formData,
@@ -340,7 +336,7 @@ const Pagination = ({ productsPerPage, totalProducts, paginate, currentPage }) =
             <ul className="pagination">
                 {pageNumbers.map(number => (
                     <li key={number} className={`page-item ${currentPage === number ? 'active' : ''}`}>
-                        <a onClick={() => paginate(number)} href="#" className="page-link">
+                        <a onClick={(e) => { e.preventDefault(); paginate(number); }} href="#" className="page-link">
                             {number}
                         </a>
                     </li>
