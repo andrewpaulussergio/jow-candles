@@ -1,37 +1,50 @@
 import { useState } from 'react'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { supabase } from '../supabaseClient'
+import './Login.css';
 
 
-function Login({ onLogin }) {
-    const [id, setId] = useState('')
+function Login({ setToken }) {
+    const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [loading, setLoading] = useState(false)
+    const [error, setError] = useState(null)
 
     const handleLogin = async (e) => {
         e.preventDefault()
         setLoading(true)
-
-        setTimeout(() => {
+        setError(null)
+        try {
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: email,
+                password: password,
+            })
+            if (error) throw error
+            setToken(data)
+        } catch (error) {
+            setError(error.message)
+        } finally {
             setLoading(false)
-            alert("Login logic goes here!")
-        }, 1000)
+        }
     }
 
     return (
-        <div className="login-container">
+        <div className="login-container" style={{backgroundImage: "url(/assets/images/jow-candles/misc/index-products-bg-large.png)"}}>
             <div className="login-card">
                 <div className="login-header">
-                    <h1>Hi Johana Koagow <span className="wave">👋🏻</span></h1>
-                    <p>Manage as you like!</p>
+                    <img src="/assets/images/jow-candles/misc/jow-candles-logo.png" alt="JOW Candles Logo" className="logo"/>
+                    <h1>Welcome Back <span className="wave">👋🏻</span></h1>
+                    <p>Manage your beautiful candle inventory.</p>
                 </div>
+
+                {error && <p className="error-message">{error}</p>}
 
                 <form onSubmit={handleLogin} className="login-form">
                     <div className="form-group">
-                        <label>Login Id</label>
+                        <label>Email</label>
                         <input
-                            type="text"
-                            value={id}
-                            onChange={(e) => setId(e.target.value)}
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                             required
                         />
                     </div>
