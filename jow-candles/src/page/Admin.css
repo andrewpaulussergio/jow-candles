@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 :root {
-    --primary-color: #d4a373;
+    --primary-color: #3d3d3d;
     --secondary-color: #fefae0;
     --danger-color: #a3333d;
     --success-color: #28a745;
@@ -53,6 +53,7 @@
 }
 
 .search-bar {
+    width: 300px;
     position: relative;
 }
 
@@ -216,8 +217,8 @@
 }
 
 .btn-primary:hover {
-    background-color: #b38b5f;
-    box-shadow: 0 4px 10px rgba(212, 163, 115, 0.4);
+    background-color: #848484;
+    box-shadow: 0 4px 10px rgba(229, 229, 229, 0.4);
     transform: translateY(-2px);
 }
 

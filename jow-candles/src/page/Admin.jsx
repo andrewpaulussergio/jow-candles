@@ -84,6 +84,10 @@ function Admin() {
                 const { publicURL } = supabase.storage.from('jow-candles-product').getPublicUrl(data.path);
                 imageUrl = publicURL;
             }
+            else {
+                alert('Pick a photo first')
+                return
+            }
 
             const productData = {
                 ...formData,
@@ -285,7 +289,7 @@ function Admin() {
                                 <label>Price</label>
                                 <input
                                     type="number"
-                                    step="0.01"
+                                    step="1000"
                                     value={formData.price}
                                     onChange={e => setFormData({ ...formData, price: e.target.value })}
                                     required
