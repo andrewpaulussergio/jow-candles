@@ -121,7 +121,7 @@ useEffect(() => {
                             </div>
                             <div className="col-lg-2 col-md-6 col-6">
                                 <div className="navbar-header" style={{paddingTop: '8px'}}>
-                                    <a className="navbar-brand" href="index.html">
+                                    <a className="navbar-brand" href="#">
                                         <img src="assets/images/jow-candles/misc/jow-candles-logo.png" alt="" width="127.5px" height="72.3px"/>
                                     </a>
                                 </div>
