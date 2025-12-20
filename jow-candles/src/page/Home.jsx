@@ -15,6 +15,17 @@ function Home() {
 
     useEffect(() => {
         if (effectRan.current === false) {
+            // SEO: Set Title and Meta Description
+            document.title = "JOW Candles | Hand-Poured Luxury Candles";
+            
+            let metaDesc = document.querySelector("meta[name='description']");
+            if (!metaDesc) {
+                metaDesc = document.createElement("meta");
+                metaDesc.name = "description";
+                document.head.appendChild(metaDesc);
+            }
+            metaDesc.content = "Discover JOW Candles - Hand-poured, luxurious candles made with premium wax and essential oils. Shop our collection of minimalist and elegant fragrances.";
+
             fetchProducts();
             
             return () => {
