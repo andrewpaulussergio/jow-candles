@@ -28,6 +28,46 @@ function formatRegex(price){
     return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
 }
 
+const compressImage = (file) => {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        const objectUrl = URL.createObjectURL(file);
+        img.src = objectUrl;
+
+        img.onload = () => {
+            URL.revokeObjectURL(objectUrl);
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+
+            // Resize to max 1200px to save space
+            const MAX_DIMENSION = 1200;
+            if (width > height && width > MAX_DIMENSION) {
+                height = Math.round((height * MAX_DIMENSION) / width);
+                width = MAX_DIMENSION;
+            } else if (height > MAX_DIMENSION) {
+                width = Math.round((width * MAX_DIMENSION) / height);
+                height = MAX_DIMENSION;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            // Recursive compression to target < 200KB
+            const compress = (quality) => {
+                canvas.toBlob((blob) => {
+                    if (!blob) return reject(new Error('Compression failed'));
+                    if (blob.size <= 200 * 1024 || quality <= 0.5) resolve(blob);
+                    else compress(quality - 0.1);
+                }, 'image/jpeg', quality);
+            };
+            compress(0.9);
+        };
+        img.onerror = (err) => reject(err);
+    });
+};
 
 function Admin() {
     const [products, setProducts] = useState([]);
@@ -74,15 +114,31 @@ function Admin() {
             let imageUrl = formData.image_url;
 
             if (uploadedFile) {
+                let fileToUpload = uploadedFile;
+                let fileExt = uploadedFile.name.split('.').pop();
+
+                try {
+                    const compressedBlob = await compressImage(uploadedFile);
+                    fileToUpload = compressedBlob;
+                    fileExt = 'jpg'; // Force jpg after compression
+                } catch (err) {
+                    console.warn('Compression failed, using original:', err);
+                }
+
                 const kebabCaseName = formData.name.toLowerCase().replace(/\s+/g, '-');
+                const fileName = `${kebabCaseName}-${Date.now()}.${fileExt}`;
+
                 const { data, error } = await supabase.storage
                     .from('jow-candles-product')
-                    .upload(`${kebabCaseName}-${Date.now()}`, uploadedFile);
+                    .upload(fileName, fileToUpload);
 
                 if (error) throw error;
 
-                const { publicURL } = supabase.storage.from('jow-candles-product').getPublicUrl(data.path);
-                imageUrl = publicURL;
+                const { data: { publicUrl } } = supabase.storage
+                    .from('jow-candles-product')
+                    .getPublicUrl(data.path);
+                
+                imageUrl = publicUrl;
             }
 
             const productData = {
@@ -121,6 +177,27 @@ function Admin() {
         if (!window.confirm('Are you sure you want to delete this product?')) return;
 
         try {
+            // 1. Get the product to find the image URL
+            const { data: product, error: fetchError } = await supabase
+                .from('products')
+                .select('image_url')
+                .eq('id', id)
+                .single();
+
+            if (fetchError) throw fetchError;
+
+            // 2. Delete image from storage if it exists in our bucket
+            if (product.image_url && product.image_url.includes('/jow-candles-product/')) {
+                const path = product.image_url.split('/jow-candles-product/').pop();
+                if (path) {
+                    const { error: storageError } = await supabase.storage
+                        .from('jow-candles-product')
+                        .remove([decodeURIComponent(path)]);
+                    
+                    if (storageError) console.warn('Failed to delete image:', storageError);
+                }
+            }
+
             const { error } = await supabase
                 .from('products')
                 .delete()
@@ -292,9 +369,10 @@ function Admin() {
                                 />
                             </div>
                             <div className="form-group">
-                                <label>Image</label>
+                                <label>Product Image</label>
                                 <input
                                     type="file"
+                                    accept="image/*"
                                     onChange={e => setUploadedFile(e.target.files[0])}
                                 />
                                 {(formData.image_url || uploadedFile) && (

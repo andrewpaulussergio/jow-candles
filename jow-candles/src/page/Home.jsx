@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import Product from '../components/Product.jsx'
 import '../App.css'
@@ -11,9 +11,16 @@ const supabase = createClient(
 function Home() {
     const [products, setProducts] = useState([])
     const [loading, setLoading] = useState(true)
+    const effectRan = useRef(false)
 
-useEffect(() => {
-    fetchProducts();
+    useEffect(() => {
+        if (effectRan.current === false) {
+            fetchProducts();
+            
+            return () => {
+                effectRan.current = true;
+            }
+        }
   }, [])
 
 useEffect(() => {
@@ -64,8 +71,6 @@ useEffect(() => {
   }
 
   const visibleProducts = products.filter(p => p.visible);
-
-  console.log
 
   return (
     <div className="page-wrapper">
@@ -238,15 +243,13 @@ useEffect(() => {
                     <div className="wpo-product-section">
                         <div className="wpo-product-wrap">
                             <div className="row">
-                                <div className="col col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
-                                    {visibleProducts.map((product) => (
+                                {visibleProducts.map((product) => (
                                         <Product
                                             productName = {product.name} 
                                             productPrice = {product.price} 
                                             path = {product.image_url}
                                         />
                                     ))}
-                                </div>
                             </div>
                         </div>
                     </div>
