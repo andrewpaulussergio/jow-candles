@@ -33,7 +33,7 @@ function Home() {
                 link.rel = 'icon';
                 document.head.appendChild(link);
             }
-            link.href = "assets/images/jow-candles/misc/jow-candles-logo.png";
+            link.href = "assets/images/jow-candles/misc/logo-white.jpg";
 
             fetchProducts();
             
