@@ -26,6 +26,15 @@ function Home() {
             }
             metaDesc.content = "Discover JOW Candles - Hand-poured, luxurious candles made with premium wax and essential oils. Shop our collection of minimalist and elegant fragrances.";
 
+            // Favicon: Set dynamically using the logo
+            let link = document.querySelector("link[rel~='icon']");
+            if (!link) {
+                link = document.createElement('link');
+                link.rel = 'icon';
+                document.head.appendChild(link);
+            }
+            link.href = "assets/images/jow-candles/misc/jow-candles-logo.png";
+
             fetchProducts();
             
             return () => {
